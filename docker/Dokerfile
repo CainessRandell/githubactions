@@ -1,0 +1,34 @@
+# ----------------------------
+# build from source
+# ----------------------------
+FROM node:current-alpine3.22 AS build
+
+USER 0
+
+WORKDIR /app
+
+COPY *.json .
+COPY prisma/ .
+COPY src/ .
+COPY .env .
+
+RUN npm install
+
+RUN ls -lash
+
+USER 1001
+
+# ----------------------------
+# run with nginx
+# ----------------------------
+FROM node:current-alpine3.22
+
+COPY --from=build /app /opt/app-root/src
+
+USER 1001
+
+EXPOSE 8080
+
+WORKDIR /opt/app-root/src
+
+CMD ["node", "server.js"]
