@@ -11,7 +11,6 @@ export default {
       lines: 20
     }
   },
-  extensionsToTreatAsEsm: [".js"],
   testMatch: ["**/tests/**/*.test.js"],
   transform: {}
 };
