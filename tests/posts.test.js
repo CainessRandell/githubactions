@@ -1,18 +1,36 @@
 import { jest } from "@jest/globals";
-import express from "express";
 import request from "supertest";
 import jwt from "jsonwebtoken";
 
-jest.mock("@prisma/client");
-import { mockPrisma } from "@prisma/client";
-import postsRouter from "../src/routes/posts.routes.js";
+const mockPrisma = {
+  post: {
+    findMany: jest.fn(),
+    findUnique: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn()
+  },
+  user: {
+    findUnique: jest.fn(),
+    create: jest.fn()
+  }
+};
 
-const app = express();
-app.use(express.json());
-app.use("/posts", postsRouter);
+let app;
 
-beforeAll(() => {
+beforeAll(async () => {
   process.env.JWT_SECRET = "test-secret";
+
+  jest.unstable_mockModule("@prisma/client", () => ({
+    PrismaClient: jest.fn(() => mockPrisma)
+  }));
+
+  const express = (await import("express")).default;
+  const postsRouter = (await import("../src/routes/posts.routes.js")).default;
+
+  app = express();
+  app.use(express.json());
+  app.use("/posts", postsRouter);
 });
 
 beforeEach(() => {
