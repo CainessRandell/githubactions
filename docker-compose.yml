@@ -1,15 +1,21 @@
+version: '3.8'
 services:
-  postgres:
-    image: postgres:15
-    container_name: fivam_postgres
-    environment:
-      POSTGRES_DB: fivam_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: admin
+  app:
+    build: .
     ports:
-      - "5433:5432"
+      - "3000:3000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/blogging_escola
+      - PORT=3000
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - mongo-data:/data/db
 
 volumes:
-  postgres-data:
+  mongo-data:

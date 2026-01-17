@@ -1,0 +1,135 @@
+@baseUrl = http://localhost:3000
+@contentType = application/json
+
+# ==========================================
+# 1. AUTENTICAÇÃO E USUÁRIOS
+# ==========================================
+
+### Criar Usuário PROFESSOR (Role: professor)
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+    "nome": "Professor Xavier",
+    "email": "xavier@escola.com",
+    "senha": "123",
+    "role": "professor"
+}
+
+### Login PROFESSOR (Para pegar o Token)
+# @name loginProf
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+    "email": "xavier@escola.com",
+    "senha": "123"
+}
+
+### Criar Usuário ALUNO (Role: aluno)
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+    "nome": "Jean Grey",
+    "email": "jean@escola.com",
+    "senha": "123",
+    "role": "aluno"
+}
+
+### Login ALUNO (Para pegar o Token)
+# @name loginAluno
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+    "email": "jean@escola.com",
+    "senha": "123"
+}
+
+# ==========================================
+# 2. CRIAÇÃO DE POSTS (Requer Token Professor)
+# ==========================================
+
+### Criar Post 1 - Boas Vindas
+POST {{baseUrl}}/posts
+Content-Type: {{contentType}}
+Authorization: Bearer {{loginProf.response.body.token}}
+
+{
+    "titulo": "Boas vindas ao ano letivo",
+    "conteudo": "Estamos muito felizes em iniciar as aulas. Sejam bem-vindos!",
+    "autor": "Prof. Xavier"
+}
+
+### Criar Post 2 - Matemática (Para teste de busca)
+POST {{baseUrl}}/posts
+Content-Type: {{contentType}}
+Authorization: Bearer {{loginProf.response.body.token}}
+
+{
+    "titulo": "Conteúdo de Matemática Avançada",
+    "conteudo": "Nesta aula vamos estudar integrais e derivadas complexas.",
+    "autor": "Prof. Xavier"
+}
+
+### Criar Post 3 - Aviso (Para teste de Edição/Exclusão)
+# @name createdPost
+POST {{baseUrl}}/posts
+Content-Type: {{contentType}}
+Authorization: Bearer {{loginProf.response.body.token}}
+
+{
+    "titulo": "Aviso de Feriado",
+    "conteudo": "Não haverá aula na próxima sexta-feira.",
+    "autor": "Prof. Xavier"
+}
+
+# ==========================================
+# 3. LEITURA E BUSCA (Acesso Aluno/Professor)
+# ==========================================
+
+### Listar Todos os Posts
+GET {{baseUrl}}/posts
+Authorization: Bearer {{loginAluno.response.body.token}}
+
+### Buscar Post por palavra-chave (Ex: Matemática)
+GET {{baseUrl}}/posts/search?q=Matemática
+Authorization: Bearer {{loginAluno.response.body.token}}
+
+### Ler um Post Específico (Usando ID do Post 3 criado acima)
+GET {{baseUrl}}/posts/{{createdPost.response.body._id}}
+Authorization: Bearer {{loginAluno.response.body.token}}
+
+# ==========================================
+# 4. EDIÇÃO E EXCLUSÃO (Apenas Professor)
+# ==========================================
+
+### Editar o Post 3 (Mudando título)
+PUT {{baseUrl}}/posts/{{createdPost.response.body._id}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{loginProf.response.body.token}}
+
+{
+    "titulo": "Aviso de Feriado (CANCELADO)",
+    "conteudo": "Haverá aula normal na sexta-feira. O feriado foi adiado."
+}
+
+### Deletar o Post 3
+DELETE {{baseUrl}}/posts/{{createdPost.response.body._id}}
+Authorization: Bearer {{loginProf.response.body.token}}
+
+# ==========================================
+# 5. TESTE DE SEGURANÇA (Deve Falhar)
+# ==========================================
+
+### Tentar Criar Post como ALUNO (Deve retornar 403 Forbidden)
+POST {{baseUrl}}/posts
+Content-Type: {{contentType}}
+Authorization: Bearer {{loginAluno.response.body.token}}
+
+{
+    "titulo": "Tentativa de Hack",
+    "conteudo": "Eu não deveria conseguir postar isso.",
+    "autor": "Jean Grey"
+}
