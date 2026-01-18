@@ -119,7 +119,7 @@ jobs:
       - name: Atualizar serviço no Render (PATCH)
         if: env.RENDER_API_KEY != '' && env.RENDER_SERVICE_ID != ''
         run: |
-          IMAGE_TAG="$IMAGE_NAME:$REF_NAME_SANITIZED"
+          IMAGE_TAG="docker.io/$IMAGE_NAME:$REF_NAME_SANITIZED"
           payload=$(jq -n \
             --arg autoDeploy "yes" \
             --arg imagePath "$IMAGE_TAG" \
