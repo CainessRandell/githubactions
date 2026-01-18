@@ -110,8 +110,8 @@ jobs:
       RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
       RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
       RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
-      RENDER_OWNER_ID: ${{ secrets.RENDER_OWNER_ID }}
-      RENDER_REGISTRY_CREDENTIAL_ID: ${{ secrets.RENDER_REGISTRY_CREDENTIAL_ID }}
+      RENDER_OWNER_ID: ${{ secrets.DOCKERHUB_USERNAME }}
+      RENDER_REGISTRY_CREDENTIAL_ID: ${{ secrets.DOCKERHUB_TOKEN }}
     steps:
       - name: Definir tag da imagem a partir da ref
         run: echo "REF_NAME_SANITIZED=${GITHUB_REF_NAME//\//-}" >> "$GITHUB_ENV"
