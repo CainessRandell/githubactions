@@ -11,8 +11,8 @@ API REST para gestão de postagens escolares, com autenticação JWT, roles (pro
 - GitHub Actions (test, Trivy, Docker, Render deploy)
 
 ## Funcionalidades
-- Público (aluno): listar posts, buscar por termo, ver post por id.
-- Professor (token JWT): criar, editar, excluir posts.
+- Aluno (JWT obrigatório): listar posts, buscar por termo, ver post por id.
+- Professor (JWT obrigatório): mesmas leituras e também criar, editar e excluir posts.
 
 ## Endpoints úteis
 - API local: `http://localhost:3000`
