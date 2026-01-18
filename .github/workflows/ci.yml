@@ -107,44 +107,30 @@ jobs:
     environment: secrets
     env:
       IMAGE_NAME: rm369075/fivam-backend-fiap
-      RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
       RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
       RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
-      RENDER_OWNER_ID: ${{ secrets.RENDER_OWNER_ID }}
-      RENDER_REGISTRY_CREDENTIAL_ID: ${{ secrets.RENDER_REGISTRY_CREDENTIAL_ID }}
+      RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
     steps:
       - name: Definir tag da imagem a partir da ref
         run: echo "REF_NAME_SANITIZED=${GITHUB_REF_NAME//\//-}" >> "$GITHUB_ENV"
 
-      - name: Atualizar serviço no Render (PATCH)
+      - name: Trigger Render deploy (POST /deploys)
         if: env.RENDER_API_KEY != '' && env.RENDER_SERVICE_ID != ''
         run: |
-          IMAGE_TAG="docker.io/$IMAGE_NAME:$REF_NAME_SANITIZED"
+          IMAGE_URL="docker.io/$IMAGE_NAME:$REF_NAME_SANITIZED"
           payload=$(jq -n \
-            --arg autoDeploy "yes" \
-            --arg imagePath "$IMAGE_TAG" \
-            --arg ownerId "$RENDER_OWNER_ID" \
-            --arg registryCredentialId "$RENDER_REGISTRY_CREDENTIAL_ID" \
-            '{
-              autoDeploy: $autoDeploy,
-              image: {
-                ownerId: ($ownerId | select(length>0)),
-                registryCredentialId: ($registryCredentialId | select(length>0)),
-                imagePath: $imagePath
-              },
-              serviceDetails: {
-                pullRequestPreviewsEnabled: "no",
-                previews: { generation: "off" }
-              }
-            }')
+            --arg clearCache "do_not_clear" \
+            --arg imageUrl "$IMAGE_URL" \
+            '{clearCache: $clearCache, imageUrl: $imageUrl}')
 
-          status=$(curl -s -o /tmp/render_api_resp.json -w "%{http_code}" -X PATCH \
-            -H "Authorization: Bearer $RENDER_API_KEY" \
-            -H "Content-Type: application/json" \
+          status=$(curl -s -o /tmp/render_api_resp.json -w "%{http_code}" -X POST \
+            -H "accept: application/json" \
+            -H "authorization: Bearer $RENDER_API_KEY" \
+            -H "content-type: application/json" \
             --data "$payload" \
-            "https://api.render.com/v1/services/$RENDER_SERVICE_ID" || true)
+            "https://api.render.com/v1/services/$RENDER_SERVICE_ID/deploys" || true)
 
-          echo "Render PATCH status: $status"
+          echo "Render deploy status: $status"
           cat /tmp/render_api_resp.json || true
           if [ "$status" -lt 200 ] || [ "$status" -ge 300 ]; then
             exit 1
