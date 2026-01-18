@@ -1,59 +1,67 @@
-# Projeto Blogging Escola 🏫
+# fivam API
 
-Plataforma de API RESTful para gerenciamento de postagens escolares, permitindo que professores publiquem conteúdos e alunos visualizem e busquem materiais.
+API REST para gestão de postagens escolares, com autenticação JWT, roles (professor/aluno) e documentação Swagger.
 
-## 🚀 Tecnologias Utilizadas
+## Stack
+- Node.js + Express
+- MongoDB + Mongoose (MongoDB Atlas free tier, Cluster0/projeto fivam)
+- JWT para auth
+- Docker / Docker Compose
+- Jest + Supertest
+- GitHub Actions (test, Trivy, Docker, Render deploy)
 
-* **Node.js & Express:** Framework backend.
-* **MongoDB & Mongoose:** Banco de dados NoSQL e ODM.
-* **JWT (JSON Web Tokens):** Autenticação e Autorização.
-* **Docker & Docker Compose:** Containerização do ambiente.
-* **Jest & Supertest:** Testes Automatizados (TDD).
-* **GitHub Actions:** CI/CD Pipeline.
+## Funcionalidades
+- Público (aluno): listar posts, buscar por termo, ver post por id.
+- Professor (token JWT): criar, editar, excluir posts.
 
-## ⚙️ Funcionalidades
+## Endpoints úteis
+- API local: `http://localhost:3000`
+- Swagger docs (prod Render free tier): `https://fivam-backend-fiap-0-0-2.onrender.com/api-docs/`
 
-### Públicas / Alunos
-* `GET /posts`: Listar todas as postagens (mais recentes primeiro).
-* `GET /posts/search?q=termo`: Buscar postagens por palavra-chave.
-* `GET /posts/:id`: Ler uma postagem específica.
+## Executar local (Docker)
+Pré-requisitos: Docker e Docker Compose.
 
-### Administrativas / Professores (Requer Token)
-* `POST /posts`: Criar nova postagem.
-* `PUT /posts/:id`: Editar postagem existente.
-* `DELETE /posts/:id`: Excluir postagem.
-
-## 🛠️ Como Rodar o Projeto
-
-### Pré-requisitos
-* Docker e Docker Compose instalados.
-
-### Passo a Passo
-1.  Clone o repositório:
-    ```bash
-    git clone [https://github.com/new-psam/Blogging-escola.git](https://github.com/new-psam/Blogging-escola.git)
-    cd Blogging-escola
-    ```
-
-2.  Crie o arquivo `.env` na raiz (se não existir) com:
-    ```env
-    PORT=3000
-    MONGO_URI=mongodb://mongo:27017/blogging_escola
-    SECRET=segredo_super_secreto
-    ```
-
-3.  Suba os containers:
-    ```bash
-    docker-compose up --build
-    ```
-
-A API estará disponível em: `http://localhost:3000`
-
-## 🧪 Como Rodar os Testes
-
-Para executar os testes de integração (TDD) que utilizam banco em memória:
-
+1) Clone:
 ```bash
-# Rodar localmente (requer Node.js instalado)
+git clone https://github.com/new-psam/Blogging-escola.git
+cd Blogging-escola
+```
+2) `.env` na raiz:
+```env
+PORT=3000
+MONGO_URI=mongodb://mongo:27017/blogging_escola
+SECRET=segredo_super_secreto
+```
+3) Suba:
+```bash
+docker-compose up --build
+```
+
+## Testes
+```bash
 npm install
 npm test
+```
+- Cobertura mínima global exigida: 20% (Jest).
+
+## CI/CD (GitHub Actions)
+Arquivo: `.github/workflows/ci.yml`
+- **test**: `npm ci` + `npm test` (falha se <20% de cobertura).
+- **trivy**: scan HIGH/CRITICAL no filesystem.
+- **docker**: build/push `rm369075/fivam-backend-fiap` com tag da ref (e `latest` no `main`).
+- **render**: `POST https://api.render.com/v1/services/$RENDER_SERVICE_ID/deploys` com `imageUrl` publicado.
+
+### Secrets necessários
+- `DOCKERHUB_USERNAME`
+- `DOCKERHUB_TOKEN`
+- `RENDER_API_KEY`
+- `RENDER_SERVICE_ID`
+
+## Infra / ambientes
+- Render (free tier, balanceado): `https://fivam-backend-fiap-0-0-2.onrender.com/api-docs/`
+- Docker Hub (free tier): `https://hub.docker.com/repositories/rm369075`
+- MongoDB Atlas: Cluster0 (projeto fivam), free tier.
+
+## Config para Render (exemplo)
+- `PORT`: 8080
+- `MONGO_URI`: `mongodb+srv://<user>:<password>@cluster0.tkbzawz.mongodb.net/?appName=Cluster0` (substitua credenciais; não exponha usuário/senha)
