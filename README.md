@@ -24,7 +24,6 @@ Pré-requisitos: Docker e Docker Compose.
 1) Clone:
 ```bash
 git clone git@github.com:CainessRandell/githubactions.git
-cd Blogging-escola
 ```
 2) `.env` na raiz:
 ```env
