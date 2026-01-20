@@ -63,4 +63,4 @@ Arquivo: `.github/workflows/ci.yml`
 
 ## Config para Render (exemplo)
 - `PORT`: 8080
-- `MONGO_URI`: `mongodb+srv://<user>:<password>@cluster0.tkbzawz.mongodb.net/?appName=Cluster0` (substitua credenciais; não exponha usuário/senha)
+- `MONGO_URI`: `mongodb+srv://<user>:<password>@cluster0.tkbzawz.mongodb.net/?appName=Cluster0` (substitua credenciais)
