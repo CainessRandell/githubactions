@@ -64,3 +64,18 @@ Arquivo: `.github/workflows/ci.yml`
 ## Config para Render (exemplo)
 - `PORT`: 8080
 - `MONGO_URI`: `mongodb+srv://<user>:<password>@cluster0.tkbzawz.mongodb.net/?appName=Cluster0` (substitua credenciais)
+  
+## Desafios e aprendizados no desenvolvimento da Fivam API
+Durante o projeto da Fivam API, enfrentamos diversos desafios técnicos que auxiliaram no crescimento de nossas habilidades.
+
+- 1. Arquitetura e segurança da aplicação
+Foi adotada uma arquitetura limpa, com boa separação de perfis por usuário. Implementamos controle de acesso baseado em perfis e autenticação via JWT.
+
+- 2. Docker
+A criação da imagem para execução em Docker foi essencial. Tivemos que realizar diversos ajustes para tornar o ambiente local idêntico ao de integração contínua, evitando o clássico problema do “na minha máquina funciona”.
+
+- 3. Segurança
+Incorporamos ferramentas de análise de vulnerabilidades desde as fases iniciais do projeto. Essa prática mudou a mentalidade da equipe, fazendo com que a segurança deixasse de ser tratada apenas ao final e passasse a integrar naturalmente o processo de desenvolvimento.
+
+- 4. Deploy automatizado no Render
+A principal dificuldade foi tornar o deploy automatizado via webhook do Render confiável. O feedback fornecido pela ferramenta é limitado, o que exigiu várias rodadas de tentativa e erro, validações manuais e ajustes até que o processo se tornasse estável.
