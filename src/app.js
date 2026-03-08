@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const routes = require('./routes');
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./docs/swagger.json');
@@ -18,6 +19,44 @@ const buildSwaggerDoc = (req) => {
   return doc;
 };
 
+const trustedDomains = (process.env.TRUSTDOMINIO || '')
+  .split(',')
+  .map((item) => item.trim().toLowerCase())
+  .filter(Boolean);
+
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true;
+  if (trustedDomains.length === 0) return true;
+
+  let parsed;
+  try {
+    parsed = new URL(origin);
+  } catch (error) {
+    return false;
+  }
+
+  const originHost = parsed.host.toLowerCase();
+  const originHostname = parsed.hostname.toLowerCase();
+  const normalizedOrigin = parsed.origin.toLowerCase();
+
+  return trustedDomains.some((allowed) => {
+    const normalizedAllowed = allowed.replace(/^https?:\/\//, '');
+    return (
+      normalizedAllowed === originHost ||
+      normalizedAllowed === originHostname ||
+      allowed === normalizedOrigin
+    );
+  });
+};
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (isAllowedOrigin(origin)) return callback(null, true);
+      return callback(new Error('Origin not allowed by CORS'));
+    },
+  })
+);
 app.use(express.json());
 const swaggerUiHandler = swaggerUi.setup(null, { swaggerUrl: '/swagger.json' });
 app.use('/api-docs', swaggerUi.serve, swaggerUiHandler);
