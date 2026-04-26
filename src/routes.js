@@ -12,13 +12,13 @@ const isProfessor = checkRole('professor');
 routes.post('/auth/register', AuthController.register);
 routes.post('/auth/login', AuthController.login);
 
-// --- Daqui para baixo, precisa estar logado (Aluno ou Professor) ---
-routes.use(authMiddleware);
-
-// Leitura (Aluno e Professor)
+// Leitura Publica
 routes.get('/posts', PostController.index);
 routes.get('/posts/search', PostController.search);
 routes.get('/posts/:id', PostController.show);
+
+// --- Daqui para baixo, precisa estar logado (Aluno ou Professor) ---
+routes.use(authMiddleware);
 
 // Escrita/Gestão (Apenas Professor)
 routes.post('/posts', isProfessor, PostController.store);
