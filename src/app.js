@@ -63,4 +63,14 @@ app.use('/api-docs', swaggerUi.serve, swaggerUiHandler);
 app.get('/swagger.json', (req, res) => res.json(buildSwaggerDoc(req)));
 app.use(routes);
 
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    return res.status(400).json({
+      error: 'JSON invalido. Para quebras de linha dentro de textos, use \\n no campo conteudo.',
+    });
+  }
+
+  return next(err);
+});
+
 module.exports = app;

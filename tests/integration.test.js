@@ -73,6 +73,31 @@ describe('Fluxo de Blogging Escola (TDD)', () => {
         expect(res.body).toHaveProperty('_id');
     });
 
+    it('Professor deve conseguir CRIAR um post com quebra de linha no conteudo', async () => {
+        const res = await request(app)
+        .post('/posts')
+        .set('Authorization', `Bearer ${tokenProfessor}` )
+        .send({
+            titulo: 'Aula de Portugues',
+            conteudo: 'Primeiro paragrafo.\nSegundo paragrafo.',
+            autor: 'Prof. Natalicio'
+        });
+
+        expect(res.statusCode).toEqual(201);
+        expect(res.body.conteudo).toBe('Primeiro paragrafo.\nSegundo paragrafo.');
+    });
+
+    it('Deve retornar erro claro quando o JSON vier com quebra de linha literal invalida', async () => {
+        const res = await request(app)
+        .post('/posts')
+        .set('Authorization', `Bearer ${tokenProfessor}` )
+        .set('Content-Type', 'application/json')
+        .send('{"titulo":"Aula","conteudo":"Primeiro paragrafo.\nSegundo paragrafo.","autor":"Prof. Natalicio"}');
+
+        expect(res.statusCode).toEqual(400);
+        expect(res.body.error).toContain('use \\n');
+    });
+
     //3. Teste de Bloqueio (Aluno)
     it('Aluno não deve conseguir CRIAR um post', async () => {
         const res = await request(app)
@@ -89,8 +114,7 @@ describe('Fluxo de Blogging Escola (TDD)', () => {
     //4. Teste de Leitura (Todos)
     it('Aluno deve conseguir LISTAR posts', async () => {
         const res = await request(app)
-            .get('/posts')
-            .set('Authorization', `Bearer ${tokenAluno}`);
+            .get('/posts');
         
         expect(res.statusCode).toEqual(200);
         expect(Array.isArray(res.body)).toBe(true);

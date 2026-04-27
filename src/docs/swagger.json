@@ -368,13 +368,16 @@
         ],
         "properties": {
           "titulo": {
-            "type": "string"
+            "type": "string",
+            "example": "O que e um verbo: explicacao completa para entender"
           },
           "conteudo": {
-            "type": "string"
+            "type": "string",
+            "example": "Primeiro paragrafo.\\nSegundo paragrafo."
           },
           "autor": {
-            "type": "string"
+            "type": "string",
+            "example": "Joao teste"
           }
         }
       },
