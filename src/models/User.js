@@ -1,8 +1,12 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
 
 const UserSchema = new mongoose.Schema({
     nome: String,
+    firebaseUid: {
+        type: String,
+        unique: true,
+        required: true
+    },
     email: { 
         type: String, 
         unique: true, 
@@ -10,20 +14,11 @@ const UserSchema = new mongoose.Schema({
         lowercase: true,
         match: /.+\@.+\.+/
     },
-    senha: { type: String, required: true },
     role: {
         type: String,
         enum: [ 'professor', 'aluno'], //Define papéis permitidos
         default: 'aluno'
     }
-});
-
-// criptografar senha antes de salvar
-UserSchema.pre('save', async function() {
-    if (this.isModified('senha')){
-        this.senha = await bcrypt.hash(this.senha, 8);
-    }
-    
 });
 
 module.exports = mongoose.model('User', UserSchema);

@@ -30,7 +30,7 @@
         "tags": [
           "Auth"
         ],
-        "summary": "Registrar novo usuário (apenas professor)",
+        "summary": "Registrar novo usuário com Firebase UID (apenas professor)",
         "security": [
           {
             "bearerAuth": []
@@ -67,7 +67,7 @@
         "tags": [
           "Auth"
         ],
-        "summary": "Realizar login",
+        "summary": "Realizar login com Firebase UID",
         "requestBody": {
           "required": true,
           "content": {
@@ -543,19 +543,20 @@
         "required": [
           "nome",
           "email",
-          "senha"
+          "firebaseUid"
         ],
         "properties": {
           "nome": {
             "type": "string"
           },
+          "firebaseUid": {
+            "type": "string",
+            "description": "UID do usuario no Firebase Authentication",
+            "example": "firebase-user-uid"
+          },
           "email": {
             "type": "string",
             "format": "email"
-          },
-          "senha": {
-            "type": "string",
-            "format": "password"
           },
           "role": {
             "type": "string",
@@ -570,17 +571,13 @@
       "LoginInput": {
         "type": "object",
         "required": [
-          "email",
-          "senha"
+          "firebaseUid"
         ],
         "properties": {
-          "email": {
+          "firebaseUid": {
             "type": "string",
-            "format": "email"
-          },
-          "senha": {
-            "type": "string",
-            "format": "password"
+            "description": "UID do usuario autenticado no Firebase Authentication",
+            "example": "firebase-user-uid"
           }
         }
       },
@@ -593,6 +590,10 @@
           "nome": {
             "type": "string",
             "example": "Joao teste"
+          },
+          "firebaseUid": {
+            "type": "string",
+            "example": "firebase-user-uid"
           },
           "email": {
             "type": "string",
@@ -621,10 +622,9 @@
             "format": "email",
             "example": "joao.silva@escola.com"
           },
-          "senha": {
+          "firebaseUid": {
             "type": "string",
-            "format": "password",
-            "example": "123456"
+            "example": "firebase-user-uid"
           },
           "role": {
             "type": "string",

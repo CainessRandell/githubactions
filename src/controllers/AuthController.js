@@ -1,21 +1,25 @@
 const User = require('../models/User');
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 module.exports = {
     async register(req, res) {
-        const { email } = req.body;
+        const { email, firebaseUid } = req.body;
         try {
+            if (!email) {
+                return res.status(400).send({ error: 'Email nao informado' });
+            }
+
+            if (!firebaseUid) {
+                return res.status(400).send({ error: 'firebaseUid nao informado' });
+            }
+
             // Verifica se usuário já existe
-            if (await User.findOne({ email })) {
+            if (await User.findOne({ $or: [{ email }, { firebaseUid }] })) {
                 return res.status(400).send({ error: 'Usuário já existe' });
             }
 
             // Tenta criar o usuário
             const user = await User.create(req.body);
-
-            // Limpa a senha para não retornar no JSON
-            user.senha = undefined;
 
             return res.send({ user });
 
@@ -27,27 +31,23 @@ module.exports = {
     },
 
     async login(req, res) {
-        const { email, senha } = req.body;
+        const { firebaseUid } = req.body;
         try {
-            // Busca usuário e senha (precisamos do campo senha que vem criptografado)
-            const user = await User.findOne({ email }).select('+senha');
+            if (!firebaseUid) {
+                return res.status(400).send({ error: 'firebaseUid nao informado' });
+            }
+
+            // Busca usuário vinculado ao Firebase Authentication
+            const user = await User.findOne({ firebaseUid });
 
             if (!user) {
                 return res.status(400).send({ error: 'Usuário não encontrado!' });
-            }
-
-            // Compara a senha enviada com a do banco
-            if (!await bcrypt.compare(senha, user.senha)) {
-                return res.status(400).send({ error: 'Senha inválida' });
             }
 
             // Gera Token
             const token = jwt.sign({ id: user.id, role: user.role }, process.env.SECRET || 'segredo_escola', {
                 expiresIn: 86400,
             });
-
-            // Remove senha do retorno
-            user.senha = undefined;
 
             res.send({ user, token });
 

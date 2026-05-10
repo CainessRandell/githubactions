@@ -32,7 +32,6 @@ module.exports = {
             }
 
             const users = await User.find(filters)
-                .select('-senha')
                 .sort({ nome: 1, email: 1 });
 
             return res.status(200).json(users);
@@ -44,7 +43,7 @@ module.exports = {
 
     async show(req, res) {
         try {
-            const user = await User.findById(req.params.id).select('-senha');
+            const user = await User.findById(req.params.id);
             if (!user) {
                 return res.status(404).json({ error: 'Usuario nao encontrado' });
             }
@@ -61,7 +60,7 @@ module.exports = {
     },
 
     async update(req, res) {
-        const { nome, email, senha, role } = req.body;
+        const { nome, email, firebaseUid, role } = req.body;
 
         try {
             if (role && !['professor', 'aluno'].includes(role.toLowerCase())) {
@@ -75,15 +74,12 @@ module.exports = {
 
             if (nome !== undefined) user.nome = nome;
             if (email !== undefined) user.email = email;
-            if (senha !== undefined) user.senha = senha;
+            if (firebaseUid !== undefined) user.firebaseUid = firebaseUid;
             if (role !== undefined) user.role = role.toLowerCase();
 
             await user.save();
 
-            const userResponse = user.toObject();
-            delete userResponse.senha;
-
-            return res.status(200).json(userResponse);
+            return res.status(200).json(user);
         } catch (err) {
             if (err.code === 11000) {
                 return res.status(400).json({ error: 'Email ja cadastrado' });

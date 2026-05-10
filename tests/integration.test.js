@@ -30,12 +30,15 @@ describe('Fluxo de Blogging Escola (TDD)', () => {
     it('Deve registrar um professor e um aluno', async () => {
         // Criar professor diretamente no banco para obter o primeiro token de gestão
         await User.create({
-            nome: 'Prof. Natalicio', email: 'profnatal@escola.com', senha: '123', role: 'professor'
+            nome: 'Prof. Natalicio',
+            firebaseUid: 'firebase-professor-uid',
+            email: 'profnatal@escola.com',
+            role: 'professor'
         });
         
         //Login professor
         const resProf = await request(app).post('/auth/login').send({
-            email: 'profnatal@escola.com', senha: '123'
+            firebaseUid: 'firebase-professor-uid'
         });
         // Se falhar, mostra o erro no terminal
         if (resProf.status !== 200) console.error("ERRO LOGIN PROF:", resProf.body);
@@ -46,13 +49,16 @@ describe('Fluxo de Blogging Escola (TDD)', () => {
         .post('/auth/register')
         .set('Authorization', `Bearer ${tokenProfessor}`)
         .send({
-            nome: 'Ulisses', email: 'alunouli@escola.com', senha: '123', role: 'aluno'
+            nome: 'Ulisses',
+            firebaseUid: 'firebase-aluno-uid',
+            email: 'alunouli@escola.com',
+            role: 'aluno'
         });
         if (regAluno.status !== 200) console.error("ERRO REGISTRO ALUNO:", regAluno.body);
 
         // Login ALuno
         const resAluno = await request(app).post('/auth/login').send({
-            email: 'alunouli@escola.com', senha: '123'
+            firebaseUid: 'firebase-aluno-uid'
         });
         if (resAluno.status !== 200) console.error("ERRO LOGIN ALUNO:", resAluno.body);
         tokenAluno = resAluno.body.token;
@@ -63,14 +69,20 @@ describe('Fluxo de Blogging Escola (TDD)', () => {
 
     it('Nao deve REGISTRAR usuario sem autenticacao de professor', async () => {
         const resSemToken = await request(app).post('/auth/register').send({
-            nome: 'Sem Token', email: 'semtoken@escola.com', senha: '123', role: 'aluno'
+            nome: 'Sem Token',
+            firebaseUid: 'firebase-sem-token-uid',
+            email: 'semtoken@escola.com',
+            role: 'aluno'
         });
 
         const resAluno = await request(app)
         .post('/auth/register')
         .set('Authorization', `Bearer ${tokenAluno}`)
         .send({
-            nome: 'Aluno Criando', email: 'alunocriando@escola.com', senha: '123', role: 'aluno'
+            nome: 'Aluno Criando',
+            firebaseUid: 'firebase-aluno-criando-uid',
+            email: 'alunocriando@escola.com',
+            role: 'aluno'
         });
 
         expect(resSemToken.statusCode).toEqual(401);
@@ -95,8 +107,8 @@ describe('Fluxo de Blogging Escola (TDD)', () => {
         expect(res.body.length).toBe(1);
         expect(res.body[0].nome).toBe('Prof. Natalicio');
         expect(res.body[0].email).toBe('profnatal@escola.com');
+        expect(res.body[0].firebaseUid).toBe('firebase-professor-uid');
         expect(res.body[0].role).toBe('professor');
-        expect(res.body[0]).not.toHaveProperty('senha');
     });
 
     it('Deve BUSCAR usuario por ID autenticado', async () => {
@@ -114,7 +126,7 @@ describe('Fluxo de Blogging Escola (TDD)', () => {
         expect(res.statusCode).toEqual(200);
         expect(res.body._id).toBe(userId);
         expect(res.body.email).toBe('profnatal@escola.com');
-        expect(res.body).not.toHaveProperty('senha');
+        expect(res.body.firebaseUid).toBe('firebase-professor-uid');
     });
 
     it('Professor deve conseguir ATUALIZAR um usuario existente', async () => {
@@ -122,7 +134,10 @@ describe('Fluxo de Blogging Escola (TDD)', () => {
         .post('/auth/register')
         .set('Authorization', `Bearer ${tokenProfessor}`)
         .send({
-            nome: 'Usuario Temporario', email: 'temporario@escola.com', senha: '123', role: 'aluno'
+            nome: 'Usuario Temporario',
+            firebaseUid: 'firebase-temporario-uid',
+            email: 'temporario@escola.com',
+            role: 'aluno'
         });
 
         const userId = regUser.body.user._id;
@@ -132,15 +147,16 @@ describe('Fluxo de Blogging Escola (TDD)', () => {
         .set('Authorization', `Bearer ${tokenProfessor}`)
         .send({
             nome: 'Usuario Atualizado',
+            firebaseUid: 'firebase-atualizado-uid',
             email: 'usuario.atualizado@escola.com',
             role: 'professor'
         });
 
         expect(res.statusCode).toEqual(200);
         expect(res.body.nome).toBe('Usuario Atualizado');
+        expect(res.body.firebaseUid).toBe('firebase-atualizado-uid');
         expect(res.body.email).toBe('usuario.atualizado@escola.com');
         expect(res.body.role).toBe('professor');
-        expect(res.body).not.toHaveProperty('senha');
     });
 
     it('Aluno nao deve conseguir ATUALIZAR usuario', async () => {
