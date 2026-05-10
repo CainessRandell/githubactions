@@ -23,6 +23,7 @@ routes.use(authMiddleware);
 
 // Usuarios
 routes.get('/users', UserController.index);
+routes.get('/users/:id', UserController.show);
 routes.put('/users/:id', isProfessor, UserController.update);
 routes.delete('/users/:id', isProfessor, UserController.delete);
 

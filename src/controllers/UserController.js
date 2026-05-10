@@ -42,6 +42,24 @@ module.exports = {
         }
     },
 
+    async show(req, res) {
+        try {
+            const user = await User.findById(req.params.id).select('-senha');
+            if (!user) {
+                return res.status(404).json({ error: 'Usuario nao encontrado' });
+            }
+
+            return res.status(200).json(user);
+        } catch (err) {
+            if (err.name === 'CastError') {
+                return res.status(400).json({ error: 'ID invalido' });
+            }
+
+            console.error('ERRO AO BUSCAR USUARIO:', err);
+            return res.status(500).json({ error: 'Erro interno ao buscar usuario' });
+        }
+    },
+
     async update(req, res) {
         const { nome, email, senha, role } = req.body;
 

@@ -80,6 +80,24 @@ describe('Fluxo de Blogging Escola (TDD)', () => {
         expect(res.body[0]).not.toHaveProperty('senha');
     });
 
+    it('Deve BUSCAR usuario por ID autenticado', async () => {
+        const listUsers = await request(app)
+        .get('/users')
+        .query({ email: 'profnatal@escola.com' })
+        .set('Authorization', `Bearer ${tokenProfessor}`);
+
+        const userId = listUsers.body[0]._id;
+
+        const res = await request(app)
+        .get(`/users/${userId}`)
+        .set('Authorization', `Bearer ${tokenAluno}`);
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body._id).toBe(userId);
+        expect(res.body.email).toBe('profnatal@escola.com');
+        expect(res.body).not.toHaveProperty('senha');
+    });
+
     it('Professor deve conseguir ATUALIZAR um usuario existente', async () => {
         const regUser = await request(app).post('/auth/register').send({
             nome: 'Usuario Temporario', email: 'temporario@escola.com', senha: '123', role: 'aluno'
