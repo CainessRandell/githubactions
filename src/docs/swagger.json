@@ -30,7 +30,8 @@
         "tags": [
           "Auth"
         ],
-        "summary": "Registrar novo usuário com Firebase UID (apenas professor)",
+        "summary": "Registrar novo usuário no Firebase (apenas professor)",
+        "description": "Cria o usuario no Firebase Authentication com email/password e salva no banco o firebaseUid retornado pelo Firebase.",
         "security": [
           {
             "bearerAuth": []
@@ -543,20 +544,21 @@
         "required": [
           "nome",
           "email",
-          "firebaseUid"
+          "password"
         ],
         "properties": {
           "nome": {
             "type": "string"
           },
-          "firebaseUid": {
-            "type": "string",
-            "description": "UID do usuario no Firebase Authentication",
-            "example": "firebase-user-uid"
-          },
           "email": {
             "type": "string",
             "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "description": "Senha inicial enviada ao Firebase Authentication. Nao e salva no banco da API.",
+            "example": "123456"
           },
           "role": {
             "type": "string",

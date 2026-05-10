@@ -7,6 +7,10 @@ services:
     environment:
       - MONGO_URI=mongodb://mongo:27017/blogging_escola
       - PORT=3000
+      - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
+      - FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL}
+      - FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY}
+      - FIREBASE_SERVICE_ACCOUNT=${FIREBASE_SERVICE_ACCOUNT}
     depends_on:
       - mongo
 

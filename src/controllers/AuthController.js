@@ -1,31 +1,53 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const { createFirebaseUser, deleteFirebaseUser } = require('../services/firebaseAdmin');
 
 module.exports = {
     async register(req, res) {
-        const { email, firebaseUid } = req.body;
+        const { nome, email, password, role } = req.body;
         try {
             if (!email) {
                 return res.status(400).send({ error: 'Email nao informado' });
             }
 
-            if (!firebaseUid) {
-                return res.status(400).send({ error: 'firebaseUid nao informado' });
+            if (!password) {
+                return res.status(400).send({ error: 'Password nao informado' });
             }
 
             // Verifica se usuário já existe
-            if (await User.findOne({ $or: [{ email }, { firebaseUid }] })) {
+            if (await User.findOne({ email })) {
                 return res.status(400).send({ error: 'Usuário já existe' });
             }
 
-            // Tenta criar o usuário
-            const user = await User.create(req.body);
+            const firebaseUser = await createFirebaseUser({
+                email,
+                password,
+                displayName: nome
+            });
+
+            let user;
+            try {
+                user = await User.create({
+                    nome,
+                    email,
+                    role,
+                    firebaseUid: firebaseUser.uid
+                });
+            } catch (mongoError) {
+                await deleteFirebaseUser(firebaseUser.uid).catch((deleteError) => {
+                    console.error('Erro ao desfazer usuario no Firebase:', deleteError);
+                });
+                throw mongoError;
+            }
 
             return res.send({ user });
 
         } catch (err) {
             // AQUI ESTÁ A CORREÇÃO: Retorna o erro real em vez de travar
             console.error("Erro no Registro:", err); 
+            if (err.code === 'auth/email-already-exists') {
+                return res.status(400).send({ error: 'Usuário já existe no Firebase Authentication' });
+            }
             return res.status(400).send({ error: 'Falha no registro', details: err.message });
         }
     },

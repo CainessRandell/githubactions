@@ -32,7 +32,7 @@ jobs:
           cache: npm
 
       - name: Instalar dependencias
-        run: npm ci # Instala tudo, incluindo o mongodb-memory-server
+        run: npm install # Instala tudo, incluindo o mongodb-memory-server
 
       - name: Rodar Testes
         run: npm test

@@ -30,11 +30,24 @@ git clone git@github.com:CainessRandell/githubactions.git
 PORT=3000
 MONGO_URI=mongodb://mongo:27017/blogging_escola
 SECRET=segredo_super_secreto
+FIREBASE_PROJECT_ID=fivam-d50ff
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxxxx@fivam-d50ff.iam.gserviceaccount.com
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 ```
 3) Suba:
 ```bash
 docker-compose up --build
 ```
+
+### Firebase Authentication
+O cadastro de usuários usa Firebase Admin no backend. A rota `POST /auth/register` recebe `nome`, `email`, `password` e `role`, cria o usuário no Firebase Authentication e salva no MongoDB o `firebaseUid` retornado pelo Firebase. A senha não é salva no banco da API.
+
+Variáveis aceitas no Docker/Render:
+- `FIREBASE_PROJECT_ID`
+- `FIREBASE_CLIENT_EMAIL`
+- `FIREBASE_PRIVATE_KEY` com quebras como `\n`
+
+Alternativamente, é possível usar `FIREBASE_SERVICE_ACCOUNT` com o JSON completo da service account em uma única variável de ambiente.
 
 ## Testes
 ```bash
@@ -45,7 +58,7 @@ npm test
 
 ## CI/CD (GitHub Actions)
 Arquivo: `.github/workflows/ci.yml`
-- **test**: `npm ci` + `npm test` (falha se <20% de cobertura).
+- **test**: `npm install` + `npm test` (falha se <20% de cobertura).
 - **trivy**: scan HIGH/CRITICAL no filesystem.
 - **docker**: build/push `rm369075/fivam-backend-fiap` com tag da ref (e `latest` no `main`).
 - **render**: `POST https://api.render.com/v1/services/$RENDER_SERVICE_ID/deploys` com `imageUrl` publicado.

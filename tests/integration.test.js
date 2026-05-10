@@ -50,15 +50,15 @@ describe('Fluxo de Blogging Escola (TDD)', () => {
         .set('Authorization', `Bearer ${tokenProfessor}`)
         .send({
             nome: 'Ulisses',
-            firebaseUid: 'firebase-aluno-uid',
             email: 'alunouli@escola.com',
+            password: '123456',
             role: 'aluno'
         });
         if (regAluno.status !== 200) console.error("ERRO REGISTRO ALUNO:", regAluno.body);
 
         // Login ALuno
         const resAluno = await request(app).post('/auth/login').send({
-            firebaseUid: 'firebase-aluno-uid'
+            firebaseUid: 'test-firebase-alunouli@escola.com'
         });
         if (resAluno.status !== 200) console.error("ERRO LOGIN ALUNO:", resAluno.body);
         tokenAluno = resAluno.body.token;
@@ -70,8 +70,8 @@ describe('Fluxo de Blogging Escola (TDD)', () => {
     it('Nao deve REGISTRAR usuario sem autenticacao de professor', async () => {
         const resSemToken = await request(app).post('/auth/register').send({
             nome: 'Sem Token',
-            firebaseUid: 'firebase-sem-token-uid',
             email: 'semtoken@escola.com',
+            password: '123456',
             role: 'aluno'
         });
 
@@ -80,8 +80,8 @@ describe('Fluxo de Blogging Escola (TDD)', () => {
         .set('Authorization', `Bearer ${tokenAluno}`)
         .send({
             nome: 'Aluno Criando',
-            firebaseUid: 'firebase-aluno-criando-uid',
             email: 'alunocriando@escola.com',
+            password: '123456',
             role: 'aluno'
         });
 
@@ -135,8 +135,8 @@ describe('Fluxo de Blogging Escola (TDD)', () => {
         .set('Authorization', `Bearer ${tokenProfessor}`)
         .send({
             nome: 'Usuario Temporario',
-            firebaseUid: 'firebase-temporario-uid',
             email: 'temporario@escola.com',
+            password: '123456',
             role: 'aluno'
         });
 
