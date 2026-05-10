@@ -31,7 +31,7 @@
           "Auth"
         ],
         "summary": "Registrar novo usuário no Firebase (apenas professor)",
-        "description": "Cria o usuario no Firebase Authentication com email/password e salva no banco o firebaseUid retornado pelo Firebase.",
+        "description": "Cria o usuario no Firebase Authentication com email/password e salva no banco o firebaseUid retornado pelo Firebase. Requer token JWT interno de um professor.",
         "security": [
           {
             "bearerAuth": []
@@ -49,10 +49,17 @@
         },
         "responses": {
           "200": {
-            "description": "Usuário criado"
+            "description": "Usuário criado no Firebase e salvo no banco",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterResponse"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Erro de validação ou usuário existente"
+            "description": "Erro de validação, usuário existente no banco ou no Firebase"
           },
           "401": {
             "description": "Não autorizado"
@@ -69,6 +76,7 @@
           "Auth"
         ],
         "summary": "Realizar login com Firebase UID",
+        "description": "Após autenticar no Firebase Authentication, envie o firebaseUid para a API emitir o token JWT interno usado nas rotas protegidas.",
         "requestBody": {
           "required": true,
           "content": {
@@ -81,7 +89,14 @@
         },
         "responses": {
           "200": {
-            "description": "Login com sucesso, retorna token"
+            "description": "Login com sucesso, retorna usuário e token JWT interno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
           },
           "400": {
             "description": "Credenciais inválidas"
@@ -548,11 +563,13 @@
         ],
         "properties": {
           "nome": {
-            "type": "string"
+            "type": "string",
+            "example": "Joao teste"
           },
           "email": {
             "type": "string",
-            "format": "email"
+            "format": "email",
+            "example": "joao@escola.com"
           },
           "password": {
             "type": "string",
@@ -566,7 +583,8 @@
               "professor",
               "aluno"
             ],
-            "default": "aluno"
+            "default": "aluno",
+            "example": "aluno"
           }
         }
       },
@@ -580,6 +598,27 @@
             "type": "string",
             "description": "UID do usuario autenticado no Firebase Authentication",
             "example": "firebase-user-uid"
+          }
+        }
+      },
+      "RegisterResponse": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/User"
+          }
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "token": {
+            "type": "string",
+            "description": "JWT interno da API usado no header Authorization: Bearer <token>",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
           }
         }
       },
