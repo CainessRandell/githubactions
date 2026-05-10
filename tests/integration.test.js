@@ -58,6 +58,28 @@ describe('Fluxo de Blogging Escola (TDD)', () => {
         expect(tokenAluno).toBeDefined();
     });
 
+    it('Nao deve LISTAR usuarios sem autenticacao', async () => {
+        const res = await request(app)
+        .get('/users');
+
+        expect(res.statusCode).toEqual(401);
+    });
+
+    it('Deve LISTAR usuarios autenticado com filtros de nome, email e role', async () => {
+        const res = await request(app)
+        .get('/users')
+        .query({ nome: 'natal', email: 'profnatal', role: 'professor' })
+        .set('Authorization', `Bearer ${tokenProfessor}`);
+
+        expect(res.statusCode).toEqual(200);
+        expect(Array.isArray(res.body)).toBe(true);
+        expect(res.body.length).toBe(1);
+        expect(res.body[0].nome).toBe('Prof. Natalicio');
+        expect(res.body[0].email).toBe('profnatal@escola.com');
+        expect(res.body[0].role).toBe('professor');
+        expect(res.body[0]).not.toHaveProperty('senha');
+    });
+
     // 2. Teste de Permissão (Professor)
     it('Professor deve conseguir CRIAR um post', async () => {
         const res = await request(app)

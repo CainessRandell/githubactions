@@ -2,6 +2,7 @@ const express = require('express');
 const routes = express.Router();
 const AuthController = require('./controllers/AuthController');
 const PostController = require('./controllers/PostController');
+const UserController = require('./controllers/UserController');
 
 //Middlewares
 const authMiddleware = require('./middlewares/auth');
@@ -19,6 +20,9 @@ routes.get('/posts/:id', PostController.show);
 
 // --- Daqui para baixo, precisa estar logado (Aluno ou Professor) ---
 routes.use(authMiddleware);
+
+// Usuarios
+routes.get('/users', UserController.index);
 
 // Escrita/Gestão (Apenas Professor)
 routes.post('/posts', isProfessor, PostController.store);

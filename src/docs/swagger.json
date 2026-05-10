@@ -18,6 +18,10 @@
     {
       "name": "Posts",
       "description": "Leitura e gestão de posts"
+    },
+    {
+      "name": "Usuarios",
+      "description": "Consulta de usuarios"
     }
   ],
   "paths": {
@@ -69,6 +73,75 @@
           },
           "400": {
             "description": "Credenciais inválidas"
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Listar usuarios",
+        "description": "Lista usuarios autenticados com filtros opcionais por nome, email ou role.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "nome",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filtra usuarios por nome, aceitando busca parcial"
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "email"
+            },
+            "description": "Filtra usuarios por email, aceitando busca parcial"
+          },
+          {
+            "name": "role",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "professor",
+                "aluno"
+              ]
+            },
+            "description": "Filtra usuarios por perfil"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de usuarios",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Filtro invalido"
+          },
+          "401": {
+            "description": "Não autorizado"
           }
         }
       }
@@ -357,6 +430,31 @@
           "senha": {
             "type": "string",
             "format": "password"
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string",
+            "example": "Joao teste"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "joao@escola.com"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "professor",
+              "aluno"
+            ],
+            "example": "aluno"
           }
         }
       },
