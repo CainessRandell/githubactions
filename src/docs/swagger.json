@@ -146,6 +146,103 @@
         }
       }
     },
+    "/users/{id}": {
+      "put": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Atualizar usuario",
+        "description": "Atualiza um usuario existente. Apenas professores podem executar esta acao.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Usuario atualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro de validacao"
+          },
+          "401": {
+            "description": "Não autorizado"
+          },
+          "403": {
+            "description": "Apenas professor"
+          },
+          "404": {
+            "description": "Usuario nao encontrado"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Excluir usuario",
+        "description": "Remove um usuario existente. Apenas professores podem executar esta acao.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Usuario removido"
+          },
+          "400": {
+            "description": "ID invalido"
+          },
+          "401": {
+            "description": "Não autorizado"
+          },
+          "403": {
+            "description": "Apenas professor"
+          },
+          "404": {
+            "description": "Usuario nao encontrado"
+          }
+        }
+      }
+    },
     "/posts": {
       "get": {
         "tags": [
@@ -447,6 +544,33 @@
             "type": "string",
             "format": "email",
             "example": "joao@escola.com"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "professor",
+              "aluno"
+            ],
+            "example": "aluno"
+          }
+        }
+      },
+      "UserUpdateInput": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "example": "Joao Silva"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "joao.silva@escola.com"
+          },
+          "senha": {
+            "type": "string",
+            "format": "password",
+            "example": "123456"
           },
           "role": {
             "type": "string",

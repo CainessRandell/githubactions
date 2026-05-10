@@ -40,5 +40,61 @@ module.exports = {
             console.error('ERRO AO LISTAR USUARIOS:', err);
             return res.status(500).json({ error: 'Erro interno ao listar usuarios' });
         }
+    },
+
+    async update(req, res) {
+        const { nome, email, senha, role } = req.body;
+
+        try {
+            if (role && !['professor', 'aluno'].includes(role.toLowerCase())) {
+                return res.status(400).json({ error: 'Role invalida' });
+            }
+
+            const user = await User.findById(req.params.id);
+            if (!user) {
+                return res.status(404).json({ error: 'Usuario nao encontrado' });
+            }
+
+            if (nome !== undefined) user.nome = nome;
+            if (email !== undefined) user.email = email;
+            if (senha !== undefined) user.senha = senha;
+            if (role !== undefined) user.role = role.toLowerCase();
+
+            await user.save();
+
+            const userResponse = user.toObject();
+            delete userResponse.senha;
+
+            return res.status(200).json(userResponse);
+        } catch (err) {
+            if (err.code === 11000) {
+                return res.status(400).json({ error: 'Email ja cadastrado' });
+            }
+
+            if (err.name === 'CastError') {
+                return res.status(400).json({ error: 'ID invalido' });
+            }
+
+            console.error('ERRO AO ATUALIZAR USUARIO:', err);
+            return res.status(400).json({ error: 'Erro ao atualizar usuario' });
+        }
+    },
+
+    async delete(req, res) {
+        try {
+            const user = await User.findByIdAndDelete(req.params.id);
+            if (!user) {
+                return res.status(404).json({ error: 'Usuario nao encontrado' });
+            }
+
+            return res.status(204).send();
+        } catch (err) {
+            if (err.name === 'CastError') {
+                return res.status(400).json({ error: 'ID invalido' });
+            }
+
+            console.error('ERRO AO DELETAR USUARIO:', err);
+            return res.status(400).json({ error: 'Erro ao deletar usuario' });
+        }
     }
 };

@@ -80,6 +80,60 @@ describe('Fluxo de Blogging Escola (TDD)', () => {
         expect(res.body[0]).not.toHaveProperty('senha');
     });
 
+    it('Professor deve conseguir ATUALIZAR um usuario existente', async () => {
+        const regUser = await request(app).post('/auth/register').send({
+            nome: 'Usuario Temporario', email: 'temporario@escola.com', senha: '123', role: 'aluno'
+        });
+
+        const userId = regUser.body.user._id;
+
+        const res = await request(app)
+        .put(`/users/${userId}`)
+        .set('Authorization', `Bearer ${tokenProfessor}`)
+        .send({
+            nome: 'Usuario Atualizado',
+            email: 'usuario.atualizado@escola.com',
+            role: 'professor'
+        });
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.nome).toBe('Usuario Atualizado');
+        expect(res.body.email).toBe('usuario.atualizado@escola.com');
+        expect(res.body.role).toBe('professor');
+        expect(res.body).not.toHaveProperty('senha');
+    });
+
+    it('Aluno nao deve conseguir ATUALIZAR usuario', async () => {
+        const listUsers = await request(app)
+        .get('/users')
+        .query({ email: 'usuario.atualizado@escola.com' })
+        .set('Authorization', `Bearer ${tokenProfessor}`);
+
+        const userId = listUsers.body[0]._id;
+
+        const res = await request(app)
+        .put(`/users/${userId}`)
+        .set('Authorization', `Bearer ${tokenAluno}`)
+        .send({ nome: 'Tentativa Aluno' });
+
+        expect(res.statusCode).toEqual(403);
+    });
+
+    it('Professor deve conseguir EXCLUIR um usuario existente', async () => {
+        const listUsers = await request(app)
+        .get('/users')
+        .query({ email: 'usuario.atualizado@escola.com' })
+        .set('Authorization', `Bearer ${tokenProfessor}`);
+
+        const userId = listUsers.body[0]._id;
+
+        const res = await request(app)
+        .delete(`/users/${userId}`)
+        .set('Authorization', `Bearer ${tokenProfessor}`);
+
+        expect(res.statusCode).toEqual(204);
+    });
+
     // 2. Teste de Permissão (Professor)
     it('Professor deve conseguir CRIAR um post', async () => {
         const res = await request(app)

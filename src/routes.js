@@ -23,6 +23,8 @@ routes.use(authMiddleware);
 
 // Usuarios
 routes.get('/users', UserController.index);
+routes.put('/users/:id', isProfessor, UserController.update);
+routes.delete('/users/:id', isProfessor, UserController.delete);
 
 // Escrita/Gestão (Apenas Professor)
 routes.post('/posts', isProfessor, PostController.store);
