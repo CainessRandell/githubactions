@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const { deleteFirebaseUser, updateFirebaseUser } = require('../services/firebaseAdmin');
 
 const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const normalizeQueryParam = (value) => {
@@ -60,7 +61,7 @@ module.exports = {
     },
 
     async update(req, res) {
-        const { nome, email, firebaseUid, role } = req.body;
+        const { nome, email, password, firebaseUid, role } = req.body;
 
         try {
             if (role && !['professor', 'aluno'].includes(role.toLowerCase())) {
@@ -70,6 +71,15 @@ module.exports = {
             const user = await User.findById(req.params.id);
             if (!user) {
                 return res.status(404).json({ error: 'Usuario nao encontrado' });
+            }
+
+            const firebaseUpdate = {};
+            if (nome !== undefined) firebaseUpdate.displayName = nome;
+            if (email !== undefined) firebaseUpdate.email = email;
+            if (password !== undefined) firebaseUpdate.password = password;
+
+            if (Object.keys(firebaseUpdate).length > 0) {
+                await updateFirebaseUser(user.firebaseUid, firebaseUpdate);
             }
 
             if (nome !== undefined) user.nome = nome;
@@ -85,6 +95,18 @@ module.exports = {
                 return res.status(400).json({ error: 'Email ja cadastrado' });
             }
 
+            if (err.code === 'auth/email-already-exists') {
+                return res.status(400).json({ error: 'Email ja cadastrado no Firebase Authentication' });
+            }
+
+            if (err.code === 'auth/user-not-found') {
+                return res.status(404).json({ error: 'Usuario nao encontrado no Firebase Authentication' });
+            }
+
+            if (err.code === 'auth/invalid-password' || err.code === 'auth/weak-password') {
+                return res.status(400).json({ error: 'Senha invalida para o Firebase Authentication' });
+            }
+
             if (err.name === 'CastError') {
                 return res.status(400).json({ error: 'ID invalido' });
             }
@@ -96,15 +118,25 @@ module.exports = {
 
     async delete(req, res) {
         try {
-            const user = await User.findByIdAndDelete(req.params.id);
+            const user = await User.findById(req.params.id);
             if (!user) {
                 return res.status(404).json({ error: 'Usuario nao encontrado' });
             }
+
+            await deleteFirebaseUser(user.firebaseUid).catch((err) => {
+                if (err.code !== 'auth/user-not-found') throw err;
+            });
+
+            await User.findByIdAndDelete(req.params.id);
 
             return res.status(204).send();
         } catch (err) {
             if (err.name === 'CastError') {
                 return res.status(400).json({ error: 'ID invalido' });
+            }
+
+            if (err.code === 'auth/user-not-found') {
+                return res.status(404).json({ error: 'Usuario nao encontrado no Firebase Authentication' });
             }
 
             console.error('ERRO AO DELETAR USUARIO:', err);

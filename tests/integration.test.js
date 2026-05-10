@@ -149,6 +149,7 @@ describe('Fluxo de Blogging Escola (TDD)', () => {
             nome: 'Usuario Atualizado',
             firebaseUid: 'firebase-atualizado-uid',
             email: 'usuario.atualizado@escola.com',
+            password: 'novaSenha123',
             role: 'professor'
         });
 

@@ -56,7 +56,13 @@ const deleteFirebaseUser = async (uid) => {
     await getFirebaseAdmin().auth().deleteUser(uid);
 };
 
+const updateFirebaseUser = async (uid, data) => {
+    if (process.env.NODE_ENV === 'test') return;
+    await getFirebaseAdmin().auth().updateUser(uid, data);
+};
+
 module.exports = {
     createFirebaseUser,
-    deleteFirebaseUser
+    deleteFirebaseUser,
+    updateFirebaseUser
 };

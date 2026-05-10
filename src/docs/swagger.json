@@ -222,7 +222,7 @@
           "Usuarios"
         ],
         "summary": "Atualizar usuario",
-        "description": "Atualiza um usuario existente. Apenas professores podem executar esta acao.",
+        "description": "Atualiza um usuario existente. Nome, email e password tambem sao atualizados no Firebase Authentication. Apenas professores podem executar esta acao.",
         "security": [
           {
             "bearerAuth": []
@@ -278,7 +278,7 @@
           "Usuarios"
         ],
         "summary": "Excluir usuario",
-        "description": "Remove um usuario existente. Apenas professores podem executar esta acao.",
+        "description": "Remove um usuario existente do MongoDB e do Firebase Authentication. Apenas professores podem executar esta acao.",
         "security": [
           {
             "bearerAuth": []
@@ -662,6 +662,12 @@
             "type": "string",
             "format": "email",
             "example": "joao.silva@escola.com"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "description": "Nova senha enviada ao Firebase Authentication. Nao e salva no banco da API.",
+            "example": "novaSenha123"
           },
           "firebaseUid": {
             "type": "string",
