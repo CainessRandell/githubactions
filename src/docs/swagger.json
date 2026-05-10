@@ -30,7 +30,12 @@
         "tags": [
           "Auth"
         ],
-        "summary": "Registrar novo usuário",
+        "summary": "Registrar novo usuário (apenas professor)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -47,6 +52,12 @@
           },
           "400": {
             "description": "Erro de validação ou usuário existente"
+          },
+          "401": {
+            "description": "Não autorizado"
+          },
+          "403": {
+            "description": "Apenas professor"
           }
         }
       }

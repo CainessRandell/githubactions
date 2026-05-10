@@ -3,7 +3,7 @@ const request = require('supertest');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const mongoose = require('mongoose');
 const app = require('../src/app');  
-//const User = require('../src/models/User'); // Ainda vamos criar
+const User = require('../src/models/User');
 
 let mongoServer;
 
@@ -28,12 +28,10 @@ describe('Fluxo de Blogging Escola (TDD)', () => {
 
     // 1. Preparação: Criar usuários
     it('Deve registrar um professor e um aluno', async () => {
-        // Criar Professor
-        const regProf = await request(app).post('/auth/register').send({
+        // Criar professor diretamente no banco para obter o primeiro token de gestão
+        await User.create({
             nome: 'Prof. Natalicio', email: 'profnatal@escola.com', senha: '123', role: 'professor'
         });
-        // Se falhar, mostra o erro no terminal
-        if (regProf.status !== 200) console.error("ERRO REGISTRO PROF:", regProf.body);
         
         //Login professor
         const resProf = await request(app).post('/auth/login').send({
@@ -44,9 +42,14 @@ describe('Fluxo de Blogging Escola (TDD)', () => {
         tokenProfessor = resProf.body.token;
 
         //Criar Aluno
-        await request(app).post('/auth/register').send({
+        const regAluno = await request(app)
+        .post('/auth/register')
+        .set('Authorization', `Bearer ${tokenProfessor}`)
+        .send({
             nome: 'Ulisses', email: 'alunouli@escola.com', senha: '123', role: 'aluno'
         });
+        if (regAluno.status !== 200) console.error("ERRO REGISTRO ALUNO:", regAluno.body);
+
         // Login ALuno
         const resAluno = await request(app).post('/auth/login').send({
             email: 'alunouli@escola.com', senha: '123'
@@ -56,6 +59,22 @@ describe('Fluxo de Blogging Escola (TDD)', () => {
 
         expect(tokenProfessor).toBeDefined();
         expect(tokenAluno).toBeDefined();
+    });
+
+    it('Nao deve REGISTRAR usuario sem autenticacao de professor', async () => {
+        const resSemToken = await request(app).post('/auth/register').send({
+            nome: 'Sem Token', email: 'semtoken@escola.com', senha: '123', role: 'aluno'
+        });
+
+        const resAluno = await request(app)
+        .post('/auth/register')
+        .set('Authorization', `Bearer ${tokenAluno}`)
+        .send({
+            nome: 'Aluno Criando', email: 'alunocriando@escola.com', senha: '123', role: 'aluno'
+        });
+
+        expect(resSemToken.statusCode).toEqual(401);
+        expect(resAluno.statusCode).toEqual(403);
     });
 
     it('Nao deve LISTAR usuarios sem autenticacao', async () => {
@@ -99,7 +118,10 @@ describe('Fluxo de Blogging Escola (TDD)', () => {
     });
 
     it('Professor deve conseguir ATUALIZAR um usuario existente', async () => {
-        const regUser = await request(app).post('/auth/register').send({
+        const regUser = await request(app)
+        .post('/auth/register')
+        .set('Authorization', `Bearer ${tokenProfessor}`)
+        .send({
             nome: 'Usuario Temporario', email: 'temporario@escola.com', senha: '123', role: 'aluno'
         });
 

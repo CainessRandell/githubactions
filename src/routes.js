@@ -10,7 +10,6 @@ const checkRole = require('./middlewares/permission');
 const isProfessor = checkRole('professor');
 
 //Rotas Públicas
-routes.post('/auth/register', AuthController.register);
 routes.post('/auth/login', AuthController.login);
 
 // Leitura Publica
@@ -20,6 +19,9 @@ routes.get('/posts/:id', PostController.show);
 
 // --- Daqui para baixo, precisa estar logado (Aluno ou Professor) ---
 routes.use(authMiddleware);
+
+// Cadastro de usuarios (Apenas Professor)
+routes.post('/auth/register', isProfessor, AuthController.register);
 
 // Usuarios
 routes.get('/users', UserController.index);
