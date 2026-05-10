@@ -59,13 +59,43 @@
             }
           },
           "400": {
-            "description": "Erro de validação, usuário existente no banco ou no Firebase"
+            "description": "Erro de validação, usuário existente no banco ou no Firebase",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Falha no registro"
+                }
+              }
+            }
           },
           "401": {
-            "description": "Não autorizado"
+            "description": "Não autorizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Token não informado"
+                }
+              }
+            }
           },
           "403": {
-            "description": "Apenas professor"
+            "description": "Apenas professor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Acesso negado: Requer permissão de professor."
+                }
+              }
+            }
           }
         }
       }
@@ -99,7 +129,17 @@
             }
           },
           "400": {
-            "description": "Credenciais inválidas"
+            "description": "Credenciais inválidas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Usuário não encontrado!"
+                }
+              }
+            }
           }
         }
       }
@@ -619,6 +659,15 @@
             "type": "string",
             "description": "JWT interno da API usado no header Authorization: Bearer <token>",
             "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "example": "Mensagem de erro"
           }
         }
       },

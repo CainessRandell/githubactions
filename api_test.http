@@ -2,134 +2,178 @@
 @contentType = application/json
 
 # ==========================================
-# 1. AUTENTICAÇÃO E USUÁRIOS
+# 1. AUTENTICACAO FIREBASE E USUARIOS
 # ==========================================
+# Pre-requisito: o professor inicial precisa existir no MongoDB com o firebaseUid abaixo.
+# O /auth/register exige token JWT interno de professor.
 
-### Criar Usuário PROFESSOR (Role: professor)
-POST {{baseUrl}}/auth/register
-Content-Type: {{contentType}}
+@firebaseUidProfessor = firebase-professor-uid
 
-{
-    "nome": "Professor Xavier",
-    "email": "xavier@escola.com",
-    "senha": "123",
-    "role": "professor"
-}
-
-### Login PROFESSOR (Para pegar o Token)
+### Login PROFESSOR com Firebase UID
 # @name loginProf
 POST {{baseUrl}}/auth/login
 Content-Type: {{contentType}}
+Accept: {{contentType}}
 
 {
-    "email": "xavier@escola.com",
-    "senha": "123"
+  "firebaseUid": "{{firebaseUidProfessor}}"
 }
 
-### Criar Usuário ALUNO (Role: aluno)
+### Criar Usuario ALUNO no Firebase e salvar no MongoDB
+# @name createdAluno
 POST {{baseUrl}}/auth/register
 Content-Type: {{contentType}}
+Accept: {{contentType}}
+Authorization: Bearer {{loginProf.response.body.token}}
 
 {
-    "nome": "Jean Grey",
-    "email": "jean@escola.com",
-    "senha": "123",
-    "role": "aluno"
+  "nome": "Jean Grey",
+  "email": "jean@escola.com",
+  "password": "123456",
+  "role": "aluno"
 }
 
-### Login ALUNO (Para pegar o Token)
+### Login ALUNO com Firebase UID
 # @name loginAluno
 POST {{baseUrl}}/auth/login
 Content-Type: {{contentType}}
+Accept: {{contentType}}
 
 {
-    "email": "jean@escola.com",
-    "senha": "123"
+  "firebaseUid": "{{createdAluno.response.body.user.firebaseUid}}"
+}
+
+### Listar Usuarios
+GET {{baseUrl}}/users
+Accept: {{contentType}}
+Authorization: Bearer {{loginProf.response.body.token}}
+
+### Buscar Usuario por ID
+GET {{baseUrl}}/users/{{createdAluno.response.body.user._id}}
+Accept: {{contentType}}
+Authorization: Bearer {{loginProf.response.body.token}}
+
+### Atualizar Usuario e senha no Firebase
+PUT {{baseUrl}}/users/{{createdAluno.response.body.user._id}}
+Content-Type: {{contentType}}
+Accept: {{contentType}}
+Authorization: Bearer {{loginProf.response.body.token}}
+
+{
+  "nome": "Jean Grey Atualizada",
+  "email": "jean.atualizada@escola.com",
+  "password": "novaSenha123",
+  "role": "aluno"
 }
 
 # ==========================================
-# 2. CRIAÇÃO DE POSTS (Requer Token Professor)
+# 2. CRIACAO DE POSTS (Requer Token Professor)
 # ==========================================
 
 ### Criar Post 1 - Boas Vindas
 POST {{baseUrl}}/posts
 Content-Type: {{contentType}}
+Accept: {{contentType}}
 Authorization: Bearer {{loginProf.response.body.token}}
 
 {
-    "titulo": "Boas vindas ao ano letivo",
-    "conteudo": "Estamos muito felizes em iniciar as aulas. Sejam bem-vindos!",
-    "autor": "Prof. Xavier"
+  "titulo": "Boas vindas ao ano letivo",
+  "conteudo": "Estamos muito felizes em iniciar as aulas. Sejam bem-vindos!",
+  "autor": "Prof. Xavier"
 }
 
-### Criar Post 2 - Matemática (Para teste de busca)
+### Criar Post 2 - Matematica
 POST {{baseUrl}}/posts
 Content-Type: {{contentType}}
+Accept: {{contentType}}
 Authorization: Bearer {{loginProf.response.body.token}}
 
 {
-    "titulo": "Conteúdo de Matemática Avançada",
-    "conteudo": "Nesta aula vamos estudar integrais e derivadas complexas.",
-    "autor": "Prof. Xavier"
+  "titulo": "Conteudo de Matematica Avancada",
+  "conteudo": "Nesta aula vamos estudar integrais e derivadas complexas.",
+  "autor": "Prof. Xavier"
 }
 
-### Criar Post 3 - Aviso (Para teste de Edição/Exclusão)
+### Criar Post 3 - Aviso
 # @name createdPost
 POST {{baseUrl}}/posts
 Content-Type: {{contentType}}
+Accept: {{contentType}}
 Authorization: Bearer {{loginProf.response.body.token}}
 
 {
-    "titulo": "Aviso de Feriado",
-    "conteudo": "Não haverá aula na próxima sexta-feira.",
-    "autor": "Prof. Xavier"
+  "titulo": "Aviso de Feriado",
+  "conteudo": "Nao havera aula na proxima sexta-feira.",
+  "autor": "Prof. Xavier"
 }
 
 # ==========================================
-# 3. LEITURA E BUSCA (Acesso Aluno/Professor)
+# 3. LEITURA E BUSCA (Acesso publico para posts)
 # ==========================================
 
 ### Listar Todos os Posts
 GET {{baseUrl}}/posts
-Authorization: Bearer {{loginAluno.response.body.token}}
+Accept: {{contentType}}
 
-### Buscar Post por palavra-chave (Ex: Matemática)
-GET {{baseUrl}}/posts/search?q=Matemática
-Authorization: Bearer {{loginAluno.response.body.token}}
+### Buscar Post por palavra-chave
+GET {{baseUrl}}/posts/search?q=Matematica
+Accept: {{contentType}}
 
-### Ler um Post Específico (Usando ID do Post 3 criado acima)
+### Ler um Post Especifico
 GET {{baseUrl}}/posts/{{createdPost.response.body._id}}
-Authorization: Bearer {{loginAluno.response.body.token}}
+Accept: {{contentType}}
 
 # ==========================================
-# 4. EDIÇÃO E EXCLUSÃO (Apenas Professor)
+# 4. EDICAO E EXCLUSAO DE POSTS (Apenas Professor)
 # ==========================================
 
-### Editar o Post 3 (Mudando título)
+### Editar Post
 PUT {{baseUrl}}/posts/{{createdPost.response.body._id}}
 Content-Type: {{contentType}}
+Accept: {{contentType}}
 Authorization: Bearer {{loginProf.response.body.token}}
 
 {
-    "titulo": "Aviso de Feriado (CANCELADO)",
-    "conteudo": "Haverá aula normal na sexta-feira. O feriado foi adiado."
+  "titulo": "Aviso de Feriado (CANCELADO)",
+  "conteudo": "Havera aula normal na sexta-feira. O feriado foi adiado.",
+  "autor": "Prof. Xavier"
 }
 
-### Deletar o Post 3
+### Deletar Post
 DELETE {{baseUrl}}/posts/{{createdPost.response.body._id}}
+Accept: {{contentType}}
 Authorization: Bearer {{loginProf.response.body.token}}
 
 # ==========================================
-# 5. TESTE DE SEGURANÇA (Deve Falhar)
+# 5. TESTES DE SEGURANCA
 # ==========================================
 
-### Tentar Criar Post como ALUNO (Deve retornar 403 Forbidden)
+### Tentar Criar Post como ALUNO (deve retornar 403)
 POST {{baseUrl}}/posts
 Content-Type: {{contentType}}
+Accept: {{contentType}}
 Authorization: Bearer {{loginAluno.response.body.token}}
 
 {
-    "titulo": "Tentativa de Hack",
-    "conteudo": "Eu não deveria conseguir postar isso.",
-    "autor": "Jean Grey"
+  "titulo": "Tentativa Bloqueada",
+  "conteudo": "Aluno nao deve conseguir criar post.",
+  "autor": "Jean Grey"
 }
+
+### Tentar Criar Usuario como ALUNO (deve retornar 403)
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+Accept: {{contentType}}
+Authorization: Bearer {{loginAluno.response.body.token}}
+
+{
+  "nome": "Aluno Criando Usuario",
+  "email": "aluno.criando@escola.com",
+  "password": "123456",
+  "role": "aluno"
+}
+
+### Excluir Usuario do MongoDB e Firebase
+DELETE {{baseUrl}}/users/{{createdAluno.response.body.user._id}}
+Accept: {{contentType}}
+Authorization: Bearer {{loginProf.response.body.token}}
